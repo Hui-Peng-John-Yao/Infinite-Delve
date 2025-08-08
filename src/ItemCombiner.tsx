@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 
-export default function ItemCombinerUI() {
-  const [item1, setItem1] = useState("");
-  const [item2, setItem2] = useState("");
+export default function ItemCombiner(props: { firstItem: string, secondItem: string }) {
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -16,7 +14,7 @@ export default function ItemCombinerUI() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            question: item1 + " " + item2
+            question: props.firstItem + " " + props.secondItem
           }),
         }
       );
