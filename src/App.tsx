@@ -55,6 +55,11 @@ function App() {
     id10: { x: 0, y: 390 },
   });
   const [alerted, setAlerted] = useState(false);
+  function combineItems(item1: string, item2: string) {
+    const combinedItem = ItemCombiner({firstItem: item1, secondItem: item2});
+    console.log("Combined item: " + combinedItem);
+    return combinedItem
+  }
 
   return (
     <div>
@@ -101,6 +106,37 @@ function App() {
     setAlerted(false);
     console.log("Alert dismissed!");
   }
+  function ItemCombiner(props: { firstItem: string, secondItem: string }) {
+    const [result, setResult] = useState("");
+    const [loading, setLoading] = useState(false);
+  
+    const handleCombine = async () => {
+      setLoading(true);
+      try {
+         //API call to FlowiseAI
+        const res = await fetch(
+          "https://cloud.flowiseai.com/api/v1/prediction/1c3d63c6-7894-4fed-96f8-89701f672d02",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              question: props.firstItem + " " + props.secondItem
+            }),
+          }
+        );
+        const data = await res.json();
+        console.log("Flowise response:", data);
+        // Set result to Flowise return, if no result, set to "No result"
+        setResult(data?.text || "No result");
+      } catch (err) {
+        console.error(err);
+        setResult("Error contacting Flowise");
+      }
+      setLoading(false);
+    };
+  
+    return result;
+  }
   function handleDragEnd(event: DragEndEvent) {
     const { delta } = event;
     const { id } = event.active;
@@ -126,6 +162,11 @@ function App() {
       console.log(
         "Item dropped successfully! " + id + " over " + event.over!.id
       );
+      const item1 = name[id as keyof typeof name];
+      const item2 = name[event.over!.id as keyof typeof name];
+      const combinedItem = combineItems(item1, item2);
+      console.log("Combined item: " + combinedItem);
+      setName((prev) => ({ ...prev, [id]: combinedItem }));
     }
   }
   function handleDragStart(event: DragStartEvent) {
