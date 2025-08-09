@@ -106,12 +106,9 @@ function App() {
     setAlerted(false);
     console.log("Alert dismissed!");
   }
-  function ItemCombiner(props: { firstItem: string, secondItem: string }) {
-    const [result, setResult] = useState("");
-    const [loading, setLoading] = useState(false);
-  
-    const handleCombine = async () => {
-      setLoading(true);
+  async function handleCombine(firstItem: string, secondItem: string){
+    var loading = true;
+    var result = "";
       try {
          //API call to FlowiseAI
         const res = await fetch(
@@ -120,24 +117,28 @@ function App() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              question: props.firstItem + " " + props.secondItem
+              question: firstItem + " " + secondItem
             }),
           }
         );
         const data = await res.json();
         console.log("Flowise response:", data);
+        const text = data.text
+        console.log("Flowise response text:", text);
         // Set result to Flowise return, if no result, set to "No result"
-        setResult(data?.text || "No result");
+        return text
       } catch (err) {
         console.error(err);
-        setResult("Error contacting Flowise");
       }
-      setLoading(false);
-    };
-  
-    return result;
+      loading = false;
   }
-  function handleDragEnd(event: DragEndEvent) {
+  async function ItemCombiner(props: { firstItem: string, secondItem: string }) {
+    console.log("Combining items: " + props.firstItem + " and " + props.secondItem);
+    var result = await handleCombine(props.firstItem, props.secondItem);
+    console.log("Combined item: " + result);
+    return result
+  }
+  async function handleDragEnd(event: DragEndEvent) {
     const { delta } = event;
     const { id } = event.active;
 
@@ -164,8 +165,7 @@ function App() {
       );
       const item1 = name[id as keyof typeof name];
       const item2 = name[event.over!.id as keyof typeof name];
-      const combinedItem = combineItems(item1, item2);
-      console.log("Combined item: " + combinedItem);
+      const combinedItem = await ItemCombiner({firstItem: item1, secondItem: item2});
       setName((prev) => ({ ...prev, [id]: combinedItem }));
     }
   }
