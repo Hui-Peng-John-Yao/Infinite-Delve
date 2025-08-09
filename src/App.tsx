@@ -3,7 +3,7 @@ import { useState } from "react";
 import DragDropItem from "./components/DragDropItem";
 import Button from "./components/Button";
 import AlertDismissable from "./components/AlertDismissable";
-import Alert from "./components/Alert";
+import ItemCombiner from "./ItemCombiner";
 
 function App() {
   const ids = [
@@ -55,12 +55,6 @@ function App() {
     id10: { x: 0, y: 390 },
   });
   const [alerted, setAlerted] = useState(false);
-  function combineItems(item1: string, item2: string) {
-    const combinedItem = ItemCombiner({firstItem: item1, secondItem: item2});
-    console.log("Combined item: " + combinedItem);
-    return combinedItem
-  }
-
   return (
     <div>
       {alerted && (
@@ -106,38 +100,7 @@ function App() {
     setAlerted(false);
     console.log("Alert dismissed!");
   }
-  async function handleCombine(firstItem: string, secondItem: string){
-    var loading = true;
-    var result = "";
-      try {
-         //API call to FlowiseAI
-        const res = await fetch(
-          "https://cloud.flowiseai.com/api/v1/prediction/1c3d63c6-7894-4fed-96f8-89701f672d02",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              question: firstItem + " " + secondItem
-            }),
-          }
-        );
-        const data = await res.json();
-        console.log("Flowise response:", data);
-        const text = data.text
-        console.log("Flowise response text:", text);
-        // Set result to Flowise return, if no result, set to "No result"
-        return text
-      } catch (err) {
-        console.error(err);
-      }
-      loading = false;
-  }
-  async function ItemCombiner(props: { firstItem: string, secondItem: string }) {
-    console.log("Combining items: " + props.firstItem + " and " + props.secondItem);
-    var result = await handleCombine(props.firstItem, props.secondItem);
-    console.log("Combined item: " + result);
-    return result
-  }
+  
   async function handleDragEnd(event: DragEndEvent) {
     const { delta } = event;
     const { id } = event.active;
@@ -165,7 +128,7 @@ function App() {
       );
       const item1 = name[id as keyof typeof name];
       const item2 = name[event.over!.id as keyof typeof name];
-      const combinedItem = await ItemCombiner({firstItem: item1, secondItem: item2});
+      const combinedItem = await ItemCombiner(item1, item2);
       setName((prev) => ({ ...prev, [id]: combinedItem }));
     }
   }
