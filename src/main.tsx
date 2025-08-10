@@ -7,6 +7,5 @@ import ItemCombinerUI from './ItemCombinerUI'
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <App />
-    <ItemCombinerUI />
   </React.StrictMode>,
 )

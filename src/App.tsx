@@ -5,8 +5,10 @@ import Button from "./components/Button";
 import AlertDismissable from "./components/AlertDismissable";
 import ItemCombiner from "./ItemCombiner";
 import ItemGenerator from "./ItemGenerator";
+import LocationGenerator from "./LocationGenerator";
 
 function App() {
+  const [location, setLocation] = useState("");
   const ids = [
     "id1",
     "id2",
@@ -20,8 +22,8 @@ function App() {
     "id10",
   ];
   const [isVisible, setIsVisible] = useState({
-    id1: true,
-    id2: true,
+    id1: false,
+    id2: false,
     id3: false,
     id4: false,
     id5: false,
@@ -32,16 +34,16 @@ function App() {
     id10: false,
   });
   const [name, setName] = useState({
-    id1: "Carrot",
-    id2: "Steel",
-    id3: "Ice",
-    id4: "Iron",
-    id5: "Diamond",
-    id6: "Gold",
-    id7: "Netherite",
-    id8: "Wood",
-    id9: "Stone",
-    id10: "Cobblestone",
+    id1: "",
+    id2: "",
+    id3: "",
+    id4: "",
+    id5: "",
+    id6: "",
+    id7: "",
+    id8: "",
+    id9: "",
+    id10: "",
   });
   useEffect(() => {
     let seen = "";
@@ -50,14 +52,14 @@ function App() {
     hasRun = true;
     
     const fetchSequentially = async (id: number) => {
-      const response = await ItemGenerator("Ambulance", seen);
+      const response = await ItemGenerator(location, seen);
       setName(prev => ({ ...prev, [`id${id}`]: response }));
       // Update Seen
       seen += response + " ";
     };
     
     const runSequentially = async () => {
-      for (let i = 1; i <= 5; i++) {
+      for (let i = 1; i <= 0; i++) {
         console.log(`id${i} seen: ${seen}`);
         await fetchSequentially(i); // Wait for each to complete, otherwise it will run in parallel and seen will be wrong
       }
@@ -104,10 +106,12 @@ function App() {
             )
         )}
       </DndContext>
-      <Button onClick={handleClick}>Click to spawn an item!</Button>
+      <Button onClick={handleGenerateClick}>Click to spawn an item!</Button>
+      <Button onClick={handleLocationClick}>Click to generate a location!</Button>
+      <p>Location: {location}</p>
     </div>
   );
-  function handleClick() {
+  async function handleGenerateClick() {
     const entries = Object.entries(isVisible);
     const idx = entries.findIndex(([key, value]) => value === false);
     if (idx === -1) {
@@ -116,6 +120,12 @@ function App() {
       return;
     }
     const spawningID = "id" + (idx + 1);
+    let seen = "";
+    for (let i = 0; i < idx; i++) { 
+      seen += name[`id${i+1}` as keyof typeof name] + " ";
+    }
+    const response = await ItemGenerator(location, seen);
+    setName(prev => ({ ...prev, [`id${idx+1}`]: response }));
     setIsVisible((prev) => ({ ...prev, [spawningID]: true }));
     setPositions((prev) => ({
       ...prev,
@@ -125,6 +135,12 @@ function App() {
       },
     }));
     console.log("Button clicked to spawn an item! " + spawningID);
+  };
+  async function handleLocationClick() {
+    const genLocation = await LocationGenerator(1);
+    console.log("GenLocation: " + genLocation);
+    setLocation(genLocation);
+    console.log("Location: " + location);
   }
   function handleCloseAlert() {
     setAlerted(false);
