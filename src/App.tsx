@@ -1,9 +1,10 @@
 import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DragDropItem from "./components/DragDropItem";
 import Button from "./components/Button";
 import AlertDismissable from "./components/AlertDismissable";
 import ItemCombiner from "./ItemCombiner";
+import ItemGenerator from "./ItemGenerator";
 
 function App() {
   const ids = [
@@ -42,6 +43,35 @@ function App() {
     id9: "Stone",
     id10: "Cobblestone",
   });
+  useEffect(() => {
+    let seen = "";
+    let hasRun = false;
+    if (hasRun) return;
+    hasRun = true;
+    
+    const fetchSequentially = async (id: number) => {
+      const response = await ItemGenerator("Ambulance", seen);
+      setName(prev => ({ ...prev, [`id${id}`]: response }));
+      // Update Seen
+      seen += response + " ";
+    };
+    
+    const runSequentially = async () => {
+      for (let i = 1; i <= 5; i++) {
+        console.log(`id${i} seen: ${seen}`);
+        await fetchSequentially(i); // Wait for each to complete, otherwise it will run in parallel and seen will be wrong
+      }
+    };
+    
+    runSequentially();
+  }, []);
+  useEffect(() => {
+    //Disable re-running of useEffect
+    let hasRun = false;
+    if (hasRun) return;
+    hasRun = true;
+    console.log("name state updated:", name);
+  }, [name]);
   const [positions, setPositions] = useState({
     id1: { x: 0, y: 120 },
     id2: { x: 0, y: 150 },
