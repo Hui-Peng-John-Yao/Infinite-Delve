@@ -9,8 +9,8 @@ import LocationGenerator from "./LocationGenerator";
 import DraggableItem from "./components/DraggableItem";
 import "./App.css";
 import Hotbar from "./components/Hotbar";
-import DroppableItem from "./components/DroppableItem/DroppableItem";
 import styles from "./components/DragDropItem/DragDropItem.module.css";
+import Combinations from "./Combinations";
 
 function App() {
   const [location, setLocation] = useState("");
@@ -121,6 +121,7 @@ function App() {
         Click to generate a location!
       </Button>
       <p>Location: {location}</p>
+      <Combinations />
     </div>
   );
   async function handleGenerateClick() {
