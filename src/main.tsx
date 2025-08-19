@@ -1,11 +1,12 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App'
-import 'bootstrap/dist/css/bootstrap.css'
-import ItemCombinerUI from './ItemCombinerUI'
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import "./Index.css";
+import "bootstrap/dist/css/bootstrap.css";
+import ItemCombinerUI from "./ItemCombinerUI";
 
-ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
+ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <App />
-  </React.StrictMode>,
-)
+  </React.StrictMode>
+);
