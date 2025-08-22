@@ -1,4 +1,4 @@
-name: Deploy Vite + React Site to S3 + CloudFront
+name: Deploy Vite + React Site to S3 + CloudFront (Frontend)
 
 on:
   push:
@@ -27,7 +27,7 @@ jobs:
         working-directory: infinitedelve
 
       - name: Sync to S3
-        run: aws s3 sync my_site/dist/ s3://${{ secrets.BUCKET_NAME }} --delete
+        run: aws s3 sync infinitedelve/dist/ s3://${{ secrets.BUCKET_NAME }} --delete
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
