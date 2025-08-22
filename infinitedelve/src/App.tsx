@@ -10,7 +10,6 @@ import DraggableItem from "./components/DraggableItem";
 import "./App.css";
 import Hotbar from "./components/Hotbar";
 import styles from "./components/DragDropItem/DragDropItem.module.css";
-import Combinations from "./Combinations";
 import { addCombo } from "./PostCombo";
 import { findCombo } from "./GetCombo";
 
@@ -123,7 +122,6 @@ function App() {
         Click to generate a location!
       </Button>
       <p>Location: {location}</p>
-      <Combinations />
     </div>
   );
   async function handleGenerateClick() {
