@@ -11,6 +11,8 @@ import "./App.css";
 import Hotbar from "./components/Hotbar";
 import styles from "./components/DragDropItem/DragDropItem.module.css";
 import Combinations from "./Combinations";
+import { addCombo } from "./PostCombo";
+import { findCombo } from "./GetCombo";
 
 function App() {
   const [location, setLocation] = useState("");
@@ -88,39 +90,6 @@ function App() {
     const parts = name[id].split(" ");
     return parts[0];
   }
-  function addCombination(element1: string, element2: string, creation: string) {
-    fetch("http://127.0.0.1:8080/api/combinations", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        element1: element1,
-        element2: element2,
-        creation: creation,
-      }),
-    })
-      .then(res => res.json())
-      .then(newRow => {
-        console.log("Inserted:", newRow);
-      })
-      .catch(err => console.error("Error inserting:", err));
-  }
-  function CheckCombination(element1: string, element2: string) {
-    var result = null;
-    const checkCombination = () => {
-      fetch(
-        `http://127.0.0.1:8080/api/combinations/check?a=${encodeURIComponent(
-          element1
-        )}&b=${encodeURIComponent(element2)}`
-      )
-        .then(res => res.json())
-        .then(data => result = data)
-        .catch(err => console.error("Error checking combination:", err));
-    }
-    checkCombination();
-    return result;
-  };
   return (
     <div>
       {alerted && (
@@ -252,17 +221,15 @@ function App() {
         const item1 = name[id as keyof typeof name];
         const item2 = name[event.over!.id as keyof typeof name];
         var combinedItem = ""
-        //Check if combination already exists
-        //const combo = CheckCombination(item1, item2) as { exists: boolean, creation: string } | null;
-        //console.log("Combo: " + combo);
-        //if (combo && combo.exists) {
-        //  combinedItem = combo.creation;
-        //}
-        //else{
-          //Use Flowise to combine items
+        const combo = await findCombo(item1, item2);  
+        if (!combo.message) {
+          combinedItem = combo.combination;
+        }
+        else{
           combinedItem = await ItemCombiner(item1, item2);
-          //addCombination(item1, item2, combinedItem);
-        //}      
+          console.log("Combined item: " + combinedItem);
+          addCombo(item1, item2, combinedItem);
+        }
       setName((prev) => ({ ...prev, [id]: combinedItem }));
       }
     } else if (!event.over) {
