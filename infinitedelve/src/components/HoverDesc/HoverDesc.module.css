@@ -1,0 +1,8 @@
+.hover-desc {
+  position: absolute;
+  background-color: white;
+  border: 1px solid black;
+  padding: 8px;
+  z-index: 100;
+  white-space: nowrap;
+}

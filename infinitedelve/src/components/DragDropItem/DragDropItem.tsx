@@ -8,6 +8,8 @@ interface Props {
   children?: React.ReactNode;
   objPosition: { x: number; y: number };
   className?: string;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }
 
 const DragDropItem = ({
@@ -15,6 +17,8 @@ const DragDropItem = ({
   children = "DragDrop Item",
   objPosition,
   className,
+  onMouseEnter,
+  onMouseLeave,
 }: Props) => {
   const { isOver, setNodeRef: setDroppableNodeRef } = useDroppable({
     id: uniqueID,
@@ -44,6 +48,8 @@ const DragDropItem = ({
       ref={combinedRef}
       style={style}
       className={className}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       {...listeners}
       {...attributes}
     >
