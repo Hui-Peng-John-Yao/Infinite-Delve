@@ -4,10 +4,10 @@ import React from "react";
 
 interface Props {
   ids: string[];
-  heading: string;
+  heading?: string;
   //onDropItem: (item: string) => void;
 }
-const Hotbar = ({ ids, heading /*onDropItem*/ }: Props) => {
+const Hotbar = ({ ids, heading = "" /*onDropItem*/ }: Props) => {
   //ids = [];
 
   //const [selectedIndex, setSelectedIndex] = useState(-1);

@@ -10,7 +10,8 @@ import DraggableItem from "./components/DraggableItem";
 import "./App.css";
 import Hotbar from "./components/Hotbar";
 import styles from "./components/DragDropItem/DragDropItem.module.css";
-import Combinations from "./Combinations";
+import HoverDesc from "./components/HoverDesc/HoverDesc";
+//import Combinations from "./Combinations";
 
 function App() {
   const [location, setLocation] = useState("");
@@ -74,6 +75,8 @@ function App() {
     id8: { x: 0, y: 360 },
     id9: { x: 0, y: 390 },
   });
+  const [HoverName, setHoverName] = useState("hover-desc");
+  const [HoverVisible, setHoverVisible] = useState(false);
   const [alerted, setAlerted] = useState(false);
   const draggableMarkup = (
     <DraggableItem uniqueID="draggable">Drag me</DraggableItem>
@@ -88,6 +91,14 @@ function App() {
     const parts = name[id].split(" ");
     return parts[0];
   }
+  function hasChild(hotbarID: string) {
+    for (let i = 0; i < 10; i++) {
+      if (parent[`id${i}` as keyof typeof parent] === hotbarID) {
+        return `id${i}`;
+      }
+    }
+    return false;
+  }
   return (
     <div>
       {alerted && (
@@ -95,6 +106,20 @@ function App() {
           "Can't spawn more than 10 items!"
         </AlertDismissable>
       )}
+      <div style={{ textAlign: "center", marginTop: "10px" }}>
+        <h1
+          style={{
+            color: "blue",
+            padding: "10px",
+            border: "4px solid black",
+            borderRadius: "10px",
+            textAlign: "center",
+            display: "inline-block",
+          }}
+        >
+          {"Level 1: " + location}
+        </h1>
+      </div>
       <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
         {/* <DroppableItem></DroppableItem> */}
         {ids.map(
@@ -107,6 +132,13 @@ function App() {
                 className={
                   parent[id as keyof typeof parent] ? styles.droppedItem : ""
                 }
+                onMouseEnter={() => {
+                  if (parent[id as keyof typeof parent] !== null) {
+                    setHoverName(name[id as keyof typeof name]);
+                    setHoverVisible(true);
+                  }
+                }}
+                onMouseLeave={() => setHoverVisible(false)}
               >
                 {parent[id as keyof typeof parent]
                   ? getIconFromName(id as keyof typeof name)
@@ -114,14 +146,15 @@ function App() {
               </DragDropItem>
             )
         )}
-        <Hotbar ids={ids} heading="Hotbar"></Hotbar>
+        <Hotbar ids={ids}></Hotbar>
       </DndContext>
+      <HoverDesc text={HoverName} visible={HoverVisible}></HoverDesc>
       <Button onClick={handleGenerateClick}>Click to spawn an item!</Button>
       <Button onClick={handleLocationClick}>
         Click to generate a location!
       </Button>
       <p>Location: {location}</p>
-      <Combinations />
+      {/* <Combinations /> */}
     </div>
   );
   async function handleGenerateClick() {
@@ -163,7 +196,7 @@ function App() {
   async function handleDragEnd(event: DragEndEvent) {
     const { delta } = event;
     const { id } = event.active;
-
+    console.log("Drag event for id: " + id + " over " + event.over?.id);
     setPositions((prev) => ({
       ...prev,
       [id]: {
@@ -177,17 +210,54 @@ function App() {
         typeof event.over.id === "string" &&
         event.over.id.includes("-hotbar")
       ) {
+        console.log(
+          "Dropping item over hotbar: " + id + " over " + event.over.id
+        );
+        const droppableId = event.over.id;
+        const droppableElement = document.getElementById(droppableId);
+        const childID = hasChild(event.over!.id);
         // Handle dropping over hotbar
         setParent((prev) => ({ ...prev, [id]: event.over!.id }));
         // Set the position of the dragged item to the position of the droppable item
-        const droppableId = event.over.id;
-        console.log("Droppable ID:", droppableId);
-        const droppableElement = document.getElementById(droppableId);
-        console.log("Droppable Element:", droppableElement);
-        const center = getDroppableCoords(droppableElement!);
-        const overX = center.x;
-        const overY = center.y;
-        console.log(overX, overY);
+        if (childID && childID !== id) {
+          console.log(
+            "Child ID found when dragging item over hotbar :",
+            childID
+          );
+          setIsVisible((prev) => ({ ...prev, [childID]: false }));
+          setParent((prev) => ({ ...prev, [childID]: null }));
+          console.log(
+            "Item dropped successfully on child item! " +
+              id +
+              " over " +
+              childID
+          );
+          const item1 = name[id as keyof typeof name];
+          const item2 = name[childID as keyof typeof name];
+          const combinedItem = await ItemCombiner(item1, item2);
+          setName((prev) => ({ ...prev, [id]: combinedItem }));
+          setParent((prev) => ({ ...prev, [id]: event.over!.id }));
+          const droppableElement = document.getElementById(event.over!.id);
+          const coords = getDroppableCoords(droppableElement!);
+          const overX = coords.x;
+          const overY = coords.y;
+          setPositions((prev) => ({
+            ...prev,
+            [id]: {
+              x: overX ?? prev[id as keyof typeof prev].x,
+              y: overY ?? prev[id as keyof typeof prev].y,
+            },
+          }));
+          console.log(
+            "Resulting item dropped over hotbar! " +
+              id +
+              " over " +
+              event.over!.id
+          );
+        }
+        const coords = getDroppableCoords(droppableElement!);
+        const overX = coords.x;
+        const overY = coords.y;
         setPositions((prev) => ({
           ...prev,
           [id]: {
@@ -203,6 +273,14 @@ function App() {
         setIsVisible((prev) => ({ ...prev, [event.over!.id]: false }));
         const overPosition =
           positions[event.over!.id as keyof typeof positions];
+        let parented = false;
+        const parentID = parent[event.over!.id as keyof typeof parent];
+        if (parentID !== null) {
+          parented = true;
+        } else {
+          setParent((prev) => ({ ...prev, [id]: null }));
+        }
+        setParent((prev) => ({ ...prev, [event.over!.id]: null }));
         setPositions((prev) => ({
           ...prev,
           [id]: {
@@ -220,7 +298,46 @@ function App() {
         const item2 = name[event.over!.id as keyof typeof name];
         const combinedItem = await ItemCombiner(item1, item2);
         setName((prev) => ({ ...prev, [id]: combinedItem }));
+        if (parented) {
+          setParent((prev) => ({ ...prev, [id]: parentID }));
+          const droppableElement = document.getElementById(parentID!);
+          const coords = getDroppableCoords(droppableElement!);
+          const overX = coords.x;
+          const overY = coords.y;
+          setPositions((prev) => ({
+            ...prev,
+            [id]: {
+              x: overX ?? prev[id as keyof typeof prev].x,
+              y: overY ?? prev[id as keyof typeof prev].y,
+            },
+          }));
+          console.log(
+            "Resulting item dropped over hotbar! " + id + " over " + parentID
+          );
+        }
       }
+    } else if (
+      event.over &&
+      event.over.id === id &&
+      parent[id as keyof typeof parent]
+    ) {
+      // If dropped on itself and has a parent, reset to parent position
+      const parentID = parent[id as keyof typeof parent];
+      const droppableElement = document.getElementById(parentID!);
+      const coords = getDroppableCoords(droppableElement!);
+      const overX = coords.x;
+      const overY = coords.y;
+      setPositions((prev) => ({
+        ...prev,
+        [id]: {
+          x: overX ?? prev[id as keyof typeof prev].x,
+          y: overY ?? prev[id as keyof typeof prev].y,
+        },
+      }));
+      console.log(
+        "Item dropped on itself with a parent, resetting to parent position: " +
+          id
+      );
     } else if (!event.over) {
       setParent((prev) => ({ ...prev, [id]: null }));
     }
