@@ -8,13 +8,16 @@ import ItemGenerator from "./ItemGenerator";
 import LocationGenerator from "./LocationGenerator";
 import DraggableItem from "./components/DraggableItem";
 import "./App.css";
-import Hotbar from "./components/Hotbar";
-import styles from "./components/DragDropItem/DragDropItem.module.css";
+import Hotbar from "./components/Hotbar/Hotbar";
+import dragDropStyles from "./components/DragDropItem/DragDropItem.module.css";
 import HoverDesc from "./components/HoverDesc/HoverDesc";
+import GoalsWindow from "./components/GoalsWindow/GoalsWindow";
 import { addCombo } from "./PostCombo";
 import { findCombo } from "./GetCombo";
 
-function App() {
+ document.body.style.overflow = 'hidden';
+
+ function App() {
   const [location, setLocation] = useState("");
   const ids = [
     "id0",
@@ -76,9 +79,12 @@ function App() {
     id8: { x: 0, y: 360 },
     id9: { x: 0, y: 390 },
   });
+  const [goals, setGoals] = useState<string[]>(["Find the key", "Unlock the door", "Escape the dungeon"]);
+  const [result, setResult] = useState<string>("");
   const [HoverName, setHoverName] = useState("hover-desc");
   const [HoverVisible, setHoverVisible] = useState(false);
   const [alerted, setAlerted] = useState(false);
+  const [levelNumber, setLevelNumber] = useState(1);
   const draggableMarkup = (
     <DraggableItem uniqueID="draggable">Drag me</DraggableItem>
   );
@@ -100,29 +106,40 @@ function App() {
     }
     return false;
   }
+  function canFitMore() {
+    let count = 0;
+    for (let i = 0; i < 10; i++) {
+      if (parent[`id${i}` as keyof typeof parent] === "goals-window-droppable") {
+        count++;
+      }
+    }
+    return count < 3;
+  }
   return (
-    <div>
-      {alerted && (
-        <AlertDismissable onClose={handleCloseAlert}>
-          "Can't spawn more than 10 items!"
-        </AlertDismissable>
-      )}
-      <div style={{ textAlign: "center", marginTop: "10px" }}>
-        <h1
-          style={{
-            color: "blue",
-            padding: "10px",
-            border: "4px solid black",
-            borderRadius: "10px",
-            textAlign: "center",
-            display: "inline-block",
-          }}
-        >
-          {"Level 1: " + location}
-        </h1>
-      </div>
+    <>
       <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
-        {/* <DroppableItem></DroppableItem> */}
+        <div style={{ position: "relative", width: "75%", height: "100%", overflow: "hidden" }} id="SandboxWindow">
+          {alerted && (
+            <AlertDismissable onClose={handleCloseAlert}>
+              "Can't spawn more than 10 items!"
+            </AlertDismissable>
+          )}
+          <div style={{ textAlign: "center", marginTop: "10px" }}>
+            <h1
+              style={{
+                color: "blue",
+                padding: "10px",
+                border: "4px solid black",
+                borderRadius: "10px",
+                textAlign: "center",
+                display: "inline-block",
+              }}
+            >
+              {"Level " + levelNumber + ": " + location}
+            </h1>
+          </div>
+        <Hotbar ids={ids}></Hotbar>
+      </div>
         {ids.map(
           (id) =>
             isVisible[id as keyof typeof isVisible] && (
@@ -131,7 +148,7 @@ function App() {
                 objPosition={positions[id as keyof typeof positions]}
                 uniqueID={id}
                 className={
-                  parent[id as keyof typeof parent] ? styles.droppedItem : ""
+                  parent[id as keyof typeof parent] ? dragDropStyles.droppedItem : dragDropStyles.undroppedItem
                 }
                 onMouseEnter={() => {
                   if (parent[id as keyof typeof parent] !== null) {
@@ -147,7 +164,7 @@ function App() {
               </DragDropItem>
             )
         )}
-        <Hotbar ids={ids} heading="Hotbar"></Hotbar>
+        <GoalsWindow goals={goals} result={result}></GoalsWindow>
       </DndContext>
       <HoverDesc text={HoverName} visible={HoverVisible}></HoverDesc>
       <Button onClick={handleGenerateClick}>Click to spawn an item!</Button>
@@ -155,7 +172,7 @@ function App() {
         Click to generate a location!
       </Button>
       <p>Location: {location}</p>
-    </div>
+    </>
   );
   async function handleGenerateClick() {
     const entries = Object.entries(isVisible);
@@ -269,6 +286,21 @@ function App() {
         console.log(
           "Item dropped over hotbar! " + id + " over " + event.over.id
         );
+      } else if (event.over.id==="goals-window-droppable") {
+        console.log("Item dropped over goals window: " + id);
+        if (canFitMore()) {
+          console.log("Fitting item into goals window: " + id);
+          setParent((prev) => ({ ...prev, [id]: "goals-window-droppable" }));
+        } else {
+          console.log("Cannot fit more items in goals window!");
+          setPositions((prev) => ({
+            ...prev,
+            [id]: {
+              x: prev[id as keyof typeof prev].x,
+              y: prev[id as keyof typeof prev].y,
+            },
+          }));
+        }
       } else {
         setIsVisible((prev) => ({ ...prev, [event.over!.id]: false }));
         const overPosition =
