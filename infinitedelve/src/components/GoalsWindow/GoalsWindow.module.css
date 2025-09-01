@@ -1,0 +1,18 @@
+.goalsWindow {
+  border: 1px solid #ccc;
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 25%;
+  background-color: #f9f9f9;
+}
+.goalsWindowDroppable {
+  border: 2px solid #9c01b0;
+  border-radius: 25px;
+  box-sizing: border-box;
+  width: 100%;
+  height: 120px;
+  display: inline-block;
+  background: #f8f9fa;
+}

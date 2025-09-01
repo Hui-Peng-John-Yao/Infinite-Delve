@@ -5,11 +5,14 @@ import styles from "./DroppableItem.module.css";
 interface Props {
   uniqueID?: string;
   children?: React.ReactNode;
+  CSSstyle?: string;
 }
 
 const DroppableItem = ({
   uniqueID = "droppable-item",
+  CSSstyle = styles.droppableItem,
   children = "Drop over me!",
+  
 }: Props) => {
   const { isOver, setNodeRef } = useDroppable({
     id: uniqueID,
@@ -29,7 +32,7 @@ const DroppableItem = ({
       ref={setNodeRef}
       id={uniqueID}
       style={style}
-      className={styles.droppableItem}
+      className={CSSstyle}
     >
       {children}
     </div>

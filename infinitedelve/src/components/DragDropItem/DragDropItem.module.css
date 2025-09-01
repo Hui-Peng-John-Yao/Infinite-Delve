@@ -1,7 +1,14 @@
+.undroppedItem {
+  font-size: 16px;
+  z-index: 1;
+}
 .droppedItem {
   border: 2px solid #007bff;
-  /*borderRadius: 8px,*/
-  padding: 12px;
+  font-size: 48px;
+  z-index: 1;
+  box-sizing: border-box;
+  width: 120px;
+  height: 120px;
   display: inline-block;
   background: #f8f9fa;
 }
