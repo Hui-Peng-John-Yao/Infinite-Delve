@@ -1,11 +1,13 @@
-import React from 'react'
-import DroppableItem from '../DroppableItem/DroppableItem'
-import styles from './GoalsWindow.module.css'
+import React from "react";
+import DroppableItem from "../DroppableItem/DroppableItem";
+import styles from "./GoalsWindow.module.css";
+import Button from "../Button";
 interface Props {
   goals: string[];
   result?: string;
+  submitAction: () => void;
 }
-const GoalsWindow = ({ goals, result="" }: Props) => {
+const GoalsWindow = ({ goals, result = "", submitAction }: Props) => {
   return (
     <div className={styles.goalsWindow}>
       <h2>To Escape</h2>
@@ -14,7 +16,13 @@ const GoalsWindow = ({ goals, result="" }: Props) => {
           <li key={index}>{goal}</li>
         ))}
       </ul>
-      <DroppableItem uniqueID="goals-window-droppable" CSSstyle={styles.goalsWindowDroppable}></DroppableItem>
+      <DroppableItem
+        uniqueID="goals-window-droppable"
+        CSSstyle={styles.goalsWindowDroppable}
+      ></DroppableItem>
+      <Button onClick={submitAction} color="primary">
+        Submit
+      </Button>
       {result && (
         <div>
           <h3>Result:</h3>
@@ -22,7 +30,7 @@ const GoalsWindow = ({ goals, result="" }: Props) => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
 export default GoalsWindow;

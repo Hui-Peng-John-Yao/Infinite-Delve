@@ -16,9 +16,9 @@ import { addCombo } from "./PostCombo";
 import { findCombo } from "./GetCombo";
 import ChallengeGenerator from "./ChallengeGenerator";
 
- document.body.style.overflow = 'hidden';
+document.body.style.overflow = "hidden";
 
- function App() {
+function App() {
   const [location, setLocation] = useState("");
   const ids = [
     "id0",
@@ -80,7 +80,11 @@ import ChallengeGenerator from "./ChallengeGenerator";
     id8: { x: 0, y: 360 },
     id9: { x: 0, y: 390 },
   });
-  const [goals, setGoals] = useState<string[]>(["Find the key", "Unlock the door", "Escape the dungeon"]);
+  const [goals, setGoals] = useState<string[]>([
+    "Find the key",
+    "Unlock the door",
+    "Escape the dungeon",
+  ]);
   const [result, setResult] = useState<string>("");
   const [HoverName, setHoverName] = useState("hover-desc");
   const [HoverVisible, setHoverVisible] = useState(false);
@@ -122,7 +126,9 @@ import ChallengeGenerator from "./ChallengeGenerator";
   function canFitMore() {
     let count = 0;
     for (let i = 0; i < 10; i++) {
-      if (parent[`id${i}` as keyof typeof parent] === "goals-window-droppable") {
+      if (
+        parent[`id${i}` as keyof typeof parent] === "goals-window-droppable"
+      ) {
         count++;
       }
     }
@@ -131,7 +137,15 @@ import ChallengeGenerator from "./ChallengeGenerator";
   return (
     <>
       <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
-        <div style={{ position: "relative", width: "75%", height: "100%", overflow: "hidden" }} id="SandboxWindow">
+        <div
+          style={{
+            position: "relative",
+            width: "75%",
+            height: "100%",
+            overflow: "hidden",
+          }}
+          id="SandboxWindow"
+        >
           {alerted && (
             <AlertDismissable onClose={handleCloseAlert}>
               "Can't spawn more than 10 items!"
@@ -151,8 +165,8 @@ import ChallengeGenerator from "./ChallengeGenerator";
               {"Level " + levelNumber + ": " + location}
             </h1>
           </div>
-        <Hotbar ids={ids}></Hotbar>
-      </div>
+          <Hotbar ids={ids}></Hotbar>
+        </div>
         {ids.map(
           (id) =>
             isVisible[id as keyof typeof isVisible] && (
@@ -161,7 +175,9 @@ import ChallengeGenerator from "./ChallengeGenerator";
                 objPosition={positions[id as keyof typeof positions]}
                 uniqueID={id}
                 className={
-                  parent[id as keyof typeof parent] ? dragDropStyles.droppedItem : dragDropStyles.undroppedItem
+                  parent[id as keyof typeof parent]
+                    ? dragDropStyles.droppedItem
+                    : dragDropStyles.undroppedItem
                 }
                 onMouseEnter={() => {
                   if (parent[id as keyof typeof parent] !== null) {
@@ -177,7 +193,11 @@ import ChallengeGenerator from "./ChallengeGenerator";
               </DragDropItem>
             )
         )}
-        <GoalsWindow goals={goals} result={result}></GoalsWindow>
+        <GoalsWindow
+          goals={goals}
+          result={result}
+          submitAction={handleSubmitClick}
+        ></GoalsWindow>
       </DndContext>
       <HoverDesc text={HoverName} visible={HoverVisible}></HoverDesc>
       <Button onClick={handleGenerateClick}>Click to spawn an item!</Button>
@@ -216,6 +236,21 @@ import ChallengeGenerator from "./ChallengeGenerator";
     console.log("GenLocation: " + genLocation);
     setLocation(genLocation);
     console.log("Location: " + location);
+  }
+  function handleSubmitClick() {
+    console.log("Submit button clicked!");
+    let itemsInGoals: string[] = [];
+    for (let i = 0; i < 10; i++) {
+      if (
+        parent[`id${i}` as keyof typeof parent] === "goals-window-droppable"
+      ) {
+        console.log(
+          "Item in goals window: " + name[`id${i}` as keyof typeof name]
+        );
+        itemsInGoals.push(name[`id${i}` as keyof typeof name]);
+      }
+    }
+    // Handle submission logic here, use itemsInGoals array for which items, and goals useState for goals. Return some sort of success/failure.
   }
   function handleCloseAlert() {
     setAlerted(false);
@@ -298,7 +333,7 @@ import ChallengeGenerator from "./ChallengeGenerator";
         console.log(
           "Item dropped over hotbar! " + id + " over " + event.over.id
         );
-      } else if (event.over.id==="goals-window-droppable") {
+      } else if (event.over.id === "goals-window-droppable") {
         console.log("Item dropped over goals window: " + id);
         if (canFitMore()) {
           console.log("Fitting item into goals window: " + id);
