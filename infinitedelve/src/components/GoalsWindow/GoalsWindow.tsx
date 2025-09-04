@@ -4,10 +4,10 @@ import styles from "./GoalsWindow.module.css";
 import Button from "../Button";
 interface Props {
   goals: string[];
-  result?: string;
+  result?: number;
   submitAction: () => void;
 }
-const GoalsWindow = ({ goals, result = "", submitAction }: Props) => {
+const GoalsWindow = ({ goals, result = 0, submitAction }: Props) => {
   return (
     <div className={styles.goalsWindow}>
       <h2>To Escape</h2>

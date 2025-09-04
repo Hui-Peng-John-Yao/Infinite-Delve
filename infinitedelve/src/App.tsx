@@ -15,6 +15,8 @@ import GoalsWindow from "./components/GoalsWindow/GoalsWindow";
 import { addCombo } from "./PostCombo";
 import { findCombo } from "./GetCombo";
 import ChallengeGenerator from "./ChallengeGenerator";
+import ChallengeJudge from "./ChallengeJudge";
+import BasicItemGenerator from "./BasicItemGenerator";
 
 document.body.style.overflow = "hidden";
 
@@ -85,7 +87,7 @@ function App() {
     "Unlock the door",
     "Escape the dungeon",
   ]);
-  const [result, setResult] = useState<string>("");
+  const [result, setResult] = useState<number>(0);
   const [HoverName, setHoverName] = useState("hover-desc");
   const [HoverVisible, setHoverVisible] = useState(false);
   const [alerted, setAlerted] = useState(false);
@@ -200,12 +202,38 @@ function App() {
         ></GoalsWindow>
       </DndContext>
       <HoverDesc text={HoverName} visible={HoverVisible}></HoverDesc>
-      <Button onClick={handleGenerateClick}>Click to spawn an item!</Button>
+      <Button onClick={handleGenerateClick}>
+        Click to spawn a themed item!
+      </Button>
+      <Button onClick={handleBasicGenerateClick}>
+        Click to spawn a basic item!
+      </Button>
       <Button onClick={handleLocationClick}>
         Click to re-roll the location!
       </Button>
     </>
   );
+  async function handleBasicGenerateClick() {
+    const entries = Object.entries(isVisible);
+    const idx = entries.findIndex(([key, value]) => value === false);
+    if (idx === -1) {
+      console.log("Cannot spawn more items!");
+      setAlerted(true);
+      return;
+    }
+    const spawningID = "id" + idx;
+    const response = await BasicItemGenerator(entries.map(([key, value]) => name[key as keyof typeof name]));
+    setName((prev) => ({ ...prev, [`id${idx}`]: response }));
+    setIsVisible((prev) => ({ ...prev, [spawningID]: true }));
+    setPositions((prev) => ({
+      ...prev,
+      [spawningID]: {
+        x: Math.floor(Math.random() * (window.innerWidth - 300 + 1)),
+        y: Math.floor(Math.random() * (window.innerHeight - 300 + 1)),
+      },
+    }));
+    console.log("Button clicked to spawn a basic item! " + spawningID);
+  }
   async function handleGenerateClick() {
     const entries = Object.entries(isVisible);
     const idx = entries.findIndex(([key, value]) => value === false);
@@ -237,7 +265,7 @@ function App() {
     setLocation(genLocation);
     console.log("Location: " + location);
   }
-  function handleSubmitClick() {
+  async function handleSubmitClick() {
     console.log("Submit button clicked!");
     let itemsInGoals: string[] = [];
     for (let i = 0; i < 10; i++) {
@@ -251,6 +279,12 @@ function App() {
       }
     }
     // Handle submission logic here, use itemsInGoals array for which items, and goals useState for goals. Return some sort of success/failure.
+    var result = [];
+    result[0] = await ChallengeJudge(goals[0], itemsInGoals);
+    result[1] = await ChallengeJudge(goals[1], itemsInGoals);
+    result[2] = await ChallengeJudge(goals[2], itemsInGoals);
+    console.log("Result: " + result);
+    setResult(result.filter((item) => item === "[Success]").length);
   }
   function handleCloseAlert() {
     setAlerted(false);
