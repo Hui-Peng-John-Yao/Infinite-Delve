@@ -14,6 +14,7 @@ import HoverDesc from "./components/HoverDesc/HoverDesc";
 import GoalsWindow from "./components/GoalsWindow/GoalsWindow";
 import { addCombo } from "./PostCombo";
 import { findCombo } from "./GetCombo";
+import ChallengeGenerator from "./ChallengeGenerator";
 
  document.body.style.overflow = 'hidden';
 
@@ -85,6 +86,18 @@ import { findCombo } from "./GetCombo";
   const [HoverVisible, setHoverVisible] = useState(false);
   const [alerted, setAlerted] = useState(false);
   const [levelNumber, setLevelNumber] = useState(1);
+  // Initialize location
+  useEffect(() => {
+    const initializeLocationGoals = async () => {
+      var genLocation = await LocationGenerator(levelNumber);
+      setLocation(genLocation);
+      var genGoals = await ChallengeGenerator(genLocation);
+      genGoals = genGoals.split("/");
+      console.log("GenGoals: " + genGoals);
+      setGoals(genGoals);
+    };
+    initializeLocationGoals();
+  }, [levelNumber]);
   const draggableMarkup = (
     <DraggableItem uniqueID="draggable">Drag me</DraggableItem>
   );
@@ -169,9 +182,8 @@ import { findCombo } from "./GetCombo";
       <HoverDesc text={HoverName} visible={HoverVisible}></HoverDesc>
       <Button onClick={handleGenerateClick}>Click to spawn an item!</Button>
       <Button onClick={handleLocationClick}>
-        Click to generate a location!
+        Click to re-roll the location!
       </Button>
-      <p>Location: {location}</p>
     </>
   );
   async function handleGenerateClick() {
