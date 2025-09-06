@@ -5,15 +5,26 @@ import Button from "../Button";
 interface Props {
   goals: string[];
   result?: number;
+  completedGoals: boolean[];
   submitAction: () => void;
 }
-const GoalsWindow = ({ goals, result = 0, submitAction }: Props) => {
+const GoalsWindow = ({
+  goals,
+  result = 0,
+  completedGoals = [],
+  submitAction,
+}: Props) => {
   return (
     <div className={styles.goalsWindow}>
       <h2>To Escape</h2>
       <ul>
         {goals.map((goal, index) => (
-          <li key={index}>{goal}</li>
+          <li
+            key={index}
+            className={completedGoals[index] ? styles.goalComplete : ""}
+          >
+            {goal}
+          </li>
         ))}
       </ul>
       <DroppableItem

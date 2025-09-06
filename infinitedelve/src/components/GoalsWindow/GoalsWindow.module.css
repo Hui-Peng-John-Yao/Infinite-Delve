@@ -16,3 +16,7 @@
   display: inline-block;
   background: #f8f9fa;
 }
+.goalComplete {
+  color: green;
+  text-decoration: line-through;
+}

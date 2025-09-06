@@ -87,6 +87,11 @@ function App() {
     "Unlock the door",
     "Escape the dungeon",
   ]);
+  const [completedGoals, setCompletedGoals] = useState<boolean[]>([
+    false,
+    false,
+    false,
+  ]);
   const [result, setResult] = useState<number>(0);
   const [HoverName, setHoverName] = useState("hover-desc");
   const [HoverVisible, setHoverVisible] = useState(false);
@@ -135,6 +140,17 @@ function App() {
       }
     }
     return count < 3;
+  }
+  async function newLevel() {
+    setResult(0);
+    setCompletedGoals([false, false, false]);
+    const genLocation = await LocationGenerator(levelNumber + 1);
+    setLevelNumber((prev) => prev + 1);
+    setLocation(genLocation);
+    var genGoals = await ChallengeGenerator(genLocation);
+    genGoals = genGoals.split("/");
+    console.log("New level GenGoals: " + genGoals);
+    setGoals(genGoals);
   }
   return (
     <>
@@ -199,6 +215,7 @@ function App() {
           goals={goals}
           result={result}
           submitAction={handleSubmitClick}
+          completedGoals={completedGoals}
         ></GoalsWindow>
       </DndContext>
       <HoverDesc text={HoverName} visible={HoverVisible}></HoverDesc>
@@ -222,7 +239,9 @@ function App() {
       return;
     }
     const spawningID = "id" + idx;
-    const response = await BasicItemGenerator(entries.map(([key, value]) => name[key as keyof typeof name]));
+    const response = await BasicItemGenerator(
+      entries.map(([key, value]) => name[key as keyof typeof name])
+    );
     setName((prev) => ({ ...prev, [`id${idx}`]: response }));
     setIsVisible((prev) => ({ ...prev, [spawningID]: true }));
     setPositions((prev) => ({
@@ -260,10 +279,7 @@ function App() {
     console.log("Button clicked to spawn an item! " + spawningID);
   }
   async function handleLocationClick() {
-    const genLocation = await LocationGenerator(1);
-    console.log("GenLocation: " + genLocation);
-    setLocation(genLocation);
-    console.log("Location: " + location);
+    newLevel();
   }
   async function handleSubmitClick() {
     console.log("Submit button clicked!");
@@ -284,7 +300,22 @@ function App() {
     result[1] = await ChallengeJudge(goals[1], itemsInGoals);
     result[2] = await ChallengeJudge(goals[2], itemsInGoals);
     console.log("Result: " + result);
-    setResult(result.filter((item) => item === "[Success]").length);
+    const resultsBool = result.map((res) => res === "[Success]");
+    let finalCompletedResults: boolean[] = [];
+    for (let i = 0; i < 3; i++) {
+      finalCompletedResults[i] = completedGoals[i] || resultsBool[i];
+    }
+    setCompletedGoals(finalCompletedResults);
+    const resultNum = finalCompletedResults.filter(
+      (item) => item === true
+    ).length;
+    console.log(finalCompletedResults);
+    setResult(resultNum);
+    if (resultNum === 3) {
+      // All goals completed successfully
+      console.log("All goals completed successfully! Advancing to next level.");
+      newLevel();
+    }
   }
   function handleCloseAlert() {
     setAlerted(false);
