@@ -311,7 +311,7 @@ function App() {
     ).length;
     console.log(finalCompletedResults);
     setResult(resultNum);
-    if (resultNum === 3) {
+    if (resultNum >= 2) {
       // All goals completed successfully
       console.log("All goals completed successfully! Advancing to next level.");
       newLevel();
@@ -325,7 +325,7 @@ function App() {
   async function handleDragEnd(event: DragEndEvent) {
     const { delta } = event;
     const { id } = event.active;
-
+    const prevPosition = positions[id as keyof typeof positions];
     setPositions((prev) => ({
       ...prev,
       [id]: {
@@ -407,13 +407,10 @@ function App() {
           console.log("Cannot fit more items in goals window!");
           setPositions((prev) => ({
             ...prev,
-            [id]: {
-              x: prev[id as keyof typeof prev].x,
-              y: prev[id as keyof typeof prev].y,
-            },
+            [id]: prevPosition,
           }));
         }
-      } else {
+      } else if (parent[event.over.id as keyof typeof parent]!=="goals-window-droppable") {
         setIsVisible((prev) => ({ ...prev, [event.over!.id]: false }));
         const overPosition =
           positions[event.over!.id as keyof typeof positions];
@@ -467,6 +464,15 @@ function App() {
             "Resulting item dropped over hotbar! " + id + " over " + parentID
           );
         }
+      } else {
+        // Dropped on an item in the goals window, reset to previous position.
+        console.log(
+          "Item dropped on an item in the goals window, resetting to previous position: " + id
+        );
+        setPositions((prev) => ({
+          ...prev,
+          [id]: prevPosition,
+        }));
       }
     } else if (
       event.over &&
