@@ -108,7 +108,7 @@ function App() {
       setGoals(genGoals);
     };
     initializeLocationGoals();
-  }, [levelNumber]);
+  }, []);
   const draggableMarkup = (
     <DraggableItem uniqueID="draggable">Drag me</DraggableItem>
   );
@@ -311,7 +311,7 @@ function App() {
     ).length;
     console.log(finalCompletedResults);
     setResult(resultNum);
-    if (resultNum === 3) {
+    if (resultNum >= 2) {
       // All goals completed successfully
       console.log("All goals completed successfully! Advancing to next level.");
       newLevel();
