@@ -108,7 +108,7 @@ function App() {
       setGoals(genGoals);
     };
     initializeLocationGoals();
-  }, [levelNumber]);
+  }, []);
   const draggableMarkup = (
     <DraggableItem uniqueID="draggable">Drag me</DraggableItem>
   );
