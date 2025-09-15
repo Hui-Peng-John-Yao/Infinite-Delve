@@ -34,11 +34,11 @@ const GoalsWindow = ({
       <Button onClick={submitAction} color="primary">
         Submit
       </Button>
-      {result && (
-        <div>
+      {result !== 0 && (
+        <>
           <h3>Result:</h3>
           <p>{result}</p>
-        </div>
+        </>
       )}
     </div>
   );
