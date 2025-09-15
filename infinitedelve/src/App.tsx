@@ -17,6 +17,7 @@ import { findCombo } from "./GetCombo";
 import ChallengeGenerator from "./ChallengeGenerator";
 import ChallengeJudge from "./ChallengeJudge";
 import BasicItemGenerator from "./BasicItemGenerator";
+import ElementalItemGenerator from "./ElementalItemGenerator";
 
 document.body.style.overflow = "hidden";
 
@@ -225,6 +226,9 @@ function App() {
       <Button onClick={handleBasicGenerateClick}>
         Click to spawn a basic item!
       </Button>
+      <Button onClick={handleElementalGenerateClick}>
+        Click to spawn an elemental item!
+      </Button>
       <Button onClick={handleLocationClick}>
         Click to re-roll the location!
       </Button>
@@ -252,6 +256,31 @@ function App() {
       },
     }));
     console.log("Button clicked to spawn a basic item! " + spawningID);
+  }
+  async function handleElementalGenerateClick() {
+    const entries = Object.entries(isVisible);
+    const idx = entries.findIndex(([key, value]) => value === false);
+    if (idx === -1) {
+      console.log("Cannot spawn more items!");
+      setAlerted(true);
+      return;
+    }
+    const spawningID = "id" + idx;
+    let seen = "";
+    for (let i = 0; i < idx; i++) {
+      seen += name[`id${i}` as keyof typeof name] + " ";
+    }
+    const response = await ElementalItemGenerator(seen.split(" "));
+    setName((prev) => ({ ...prev, [`id${idx}`]: response }));
+    setIsVisible((prev) => ({ ...prev, [spawningID]: true }));
+    setPositions((prev) => ({
+      ...prev,
+      [spawningID]: {
+        x: Math.floor(Math.random() * (window.innerWidth - 300 + 1)),
+        y: Math.floor(Math.random() * (window.innerHeight - 300 + 1)),
+      },
+    }));
+    console.log("Button clicked to spawn an item! " + spawningID);
   }
   async function handleGenerateClick() {
     const entries = Object.entries(isVisible);
