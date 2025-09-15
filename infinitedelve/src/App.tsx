@@ -220,13 +220,13 @@ function App() {
         ></GoalsWindow>
       </DndContext>
       <HoverDesc text={HoverName} visible={HoverVisible}></HoverDesc>
-      <Button onClick={handleGenerateClick}>
+      <Button onClick={() => handleGenerateClick("location")}>
         Click to spawn a themed item!
       </Button>
-      <Button onClick={handleBasicGenerateClick}>
+      <Button onClick={() => handleGenerateClick("basic")}>
         Click to spawn a basic item!
       </Button>
-      <Button onClick={handleElementalGenerateClick}>
+      <Button onClick={() => handleGenerateClick("elemental")}>
         Click to spawn an elemental item!
       </Button>
       <Button onClick={handleLocationClick}>
@@ -234,44 +234,46 @@ function App() {
       </Button>
     </>
   );
-  async function handleBasicGenerateClick() {
-    const entries = Object.entries(isVisible);
-    const idx = entries.findIndex(([key, value]) => value === false);
-    if (idx === -1) {
-      console.log("Cannot spawn more items!");
-      setAlerted(true);
-      return;
+  async function handleGenerateClick(type: string) {
+    let idx = null;
+    let seenIDS: string[] = [];
+    for (let i = 0; i < 10; i++) {
+      if (isVisible[`id${i}` as keyof typeof isVisible] === true) {
+        seenIDS.push(name[`id${i}` as keyof typeof name]);
+      } else if (idx === null) {
+        idx = i;
+      }
     }
-    const spawningID = "id" + idx;
-    const response = await BasicItemGenerator(
-      entries.map(([key, value]) => name[key as keyof typeof name])
-    );
-    setName((prev) => ({ ...prev, [`id${idx}`]: response }));
-    setIsVisible((prev) => ({ ...prev, [spawningID]: true }));
-    setPositions((prev) => ({
-      ...prev,
-      [spawningID]: {
-        x: Math.floor(Math.random() * (window.innerWidth - 300 + 1)),
-        y: Math.floor(Math.random() * (window.innerHeight - 300 + 1)),
-      },
-    }));
-    console.log("Button clicked to spawn a basic item! " + spawningID);
-  }
-  async function handleElementalGenerateClick() {
-    const entries = Object.entries(isVisible);
-    const idx = entries.findIndex(([key, value]) => value === false);
-    if (idx === -1) {
+    if (seenIDS.length === 10) {
       console.log("Cannot spawn more items!");
       setAlerted(true);
       return;
     }
     const spawningID = "id" + idx;
     let seen = "";
-    for (let i = 0; i < idx; i++) {
-      seen += name[`id${i}` as keyof typeof name] + " ";
+    for (const name of seenIDS) {
+      seen += name + " ";
     }
-    const response = await ElementalItemGenerator(seen.split(" "));
-    setName((prev) => ({ ...prev, [`id${idx}`]: response }));
+    let response = "";
+    switch (type) {
+      case "basic":
+        response = await BasicItemGenerator(seen);
+        console.log("Button clicked to spawn a basic item! " + spawningID);
+        break;
+      case "location":
+        response = await ItemGenerator(location, seen);
+        console.log("Button clicked to spawn a location item! " + spawningID);
+        break;
+      case "elemental":
+        response = await ElementalItemGenerator(seen);
+        console.log("Button clicked to spawn an elemental item! " + spawningID);
+        break;
+      default:
+        response = await BasicItemGenerator(seen);
+        console.log("Switch case default! Reverting to default. " + spawningID);
+        break;
+    }
+    setName((prev) => ({ ...prev, [spawningID]: response }));
     setIsVisible((prev) => ({ ...prev, [spawningID]: true }));
     setPositions((prev) => ({
       ...prev,
@@ -280,32 +282,7 @@ function App() {
         y: Math.floor(Math.random() * (window.innerHeight - 300 + 1)),
       },
     }));
-    console.log("Button clicked to spawn an item! " + spawningID);
-  }
-  async function handleGenerateClick() {
-    const entries = Object.entries(isVisible);
-    const idx = entries.findIndex(([key, value]) => value === false);
-    if (idx === -1) {
-      console.log("Cannot spawn more items!");
-      setAlerted(true);
-      return;
-    }
-    const spawningID = "id" + idx;
-    let seen = "";
-    for (let i = 0; i < idx; i++) {
-      seen += name[`id${i}` as keyof typeof name] + " ";
-    }
-    const response = await ItemGenerator(location, seen);
-    setName((prev) => ({ ...prev, [`id${idx}`]: response }));
-    setIsVisible((prev) => ({ ...prev, [spawningID]: true }));
-    setPositions((prev) => ({
-      ...prev,
-      [spawningID]: {
-        x: Math.floor(Math.random() * (window.innerWidth - 300 + 1)),
-        y: Math.floor(Math.random() * (window.innerHeight - 300 + 1)),
-      },
-    }));
-    console.log("Button clicked to spawn an item! " + spawningID);
+    
   }
   async function handleLocationClick() {
     newLevel();
