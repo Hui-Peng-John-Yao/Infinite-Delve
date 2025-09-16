@@ -98,6 +98,8 @@ function App() {
   const [HoverVisible, setHoverVisible] = useState(false);
   const [alerted, setAlerted] = useState(false);
   const [levelNumber, setLevelNumber] = useState(1);
+  const [showContinueButton, setShowContinueButton] = useState(false);
+  const [challengeDescriptions, setChallengeDescriptions] = useState<string[]>([]);
   // Initialize location
   useEffect(() => {
     const initializeLocationGoals = async () => {
@@ -145,6 +147,8 @@ function App() {
   async function newLevel() {
     setResult(0);
     setCompletedGoals([false, false, false]);
+    setShowContinueButton(false);
+    setChallengeDescriptions([]);
     const genLocation = await LocationGenerator(levelNumber + 1);
     setLevelNumber((prev) => prev + 1);
     setLocation(genLocation);
@@ -152,6 +156,10 @@ function App() {
     genGoals = genGoals.split("/");
     console.log("New level GenGoals: " + genGoals);
     setGoals(genGoals);
+  }
+  async function handleContinueClick() {
+    console.log("Continue button clicked! Advancing to next level.");
+    newLevel();
   }
   return (
     <>
@@ -232,6 +240,43 @@ function App() {
       <Button onClick={handleLocationClick}>
         Click to re-roll the location!
       </Button>
+      {showContinueButton && (
+        <Button onClick={handleContinueClick}>
+          Continue
+        </Button>
+      )}
+      {challengeDescriptions.length > 0 && (
+        <div style={{ 
+          position: "fixed", 
+          top: "50%", 
+          left: "50%", 
+          transform: "translate(-50%, -50%)", 
+          backgroundColor: "white", 
+          border: "2px solid black", 
+          borderRadius: "10px", 
+          padding: "20px", 
+          maxWidth: "80%", 
+          maxHeight: "60%", 
+          overflow: "auto",
+          zIndex: 1000,
+          boxShadow: "0 4px 8px rgba(0,0,0,0.3)"
+        }}>
+          <h3 style={{ marginTop: 0, textAlign: "center" }}>Challenge Results</h3>
+          {challengeDescriptions.map((description, index) => (
+            <div key={index} style={{ marginBottom: "15px" }}>
+              <h4 style={{ margin: "5px 0", color: completedGoals[index] ? "green" : "red" }}>
+                {goals[index]} - {completedGoals[index] ? "SUCCESS" : "FAILURE"}
+              </h4>
+              <p style={{ margin: "5px 0", lineHeight: "1.4" }}>{description}</p>
+            </div>
+          ))}
+          <div style={{ textAlign: "center", marginTop: "15px" }}>
+            <Button onClick={() => setChallengeDescriptions([])}>
+              Close
+            </Button>
+          </div>
+        </div>
+      )}
     </>
   );
   async function handleGenerateClick(type: string) {
@@ -302,16 +347,22 @@ function App() {
     }
     // Handle submission logic here, use itemsInGoals array for which items, and goals useState for goals. Return some sort of success/failure.
     var result = [];
+    var descriptions = [];
     result[0] = await ChallengeJudge(goals[0], itemsInGoals);
     result[1] = await ChallengeJudge(goals[1], itemsInGoals);
     result[2] = await ChallengeJudge(goals[2], itemsInGoals);
     console.log("Result: " + result);
-    const resultsBool = result.map((res) => res === "[Success]");
+    
+    // Extract success status and descriptions from the new format
+    const resultsBool = result.map((res) => res.success);
+    descriptions = result.map((res) => res.description);
+    
     let finalCompletedResults: boolean[] = [];
     for (let i = 0; i < 3; i++) {
       finalCompletedResults[i] = completedGoals[i] || resultsBool[i];
     }
     setCompletedGoals(finalCompletedResults);
+    setChallengeDescriptions(descriptions);
     const resultNum = finalCompletedResults.filter(
       (item) => item === true
     ).length;
@@ -319,8 +370,8 @@ function App() {
     setResult(resultNum);
     if (resultNum >= 2) {
       // All goals completed successfully
-      console.log("All goals completed successfully! Advancing to next level.");
-      newLevel();
+      console.log("All goals completed successfully! Show continue button.");
+      setShowContinueButton(true);
     }
   }
   function handleCloseAlert() {

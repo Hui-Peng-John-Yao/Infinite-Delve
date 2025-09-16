@@ -20,10 +20,21 @@ export default async function handleJudgement(
       console.log("Flowise response:", data);
       const text = data.text;
       console.log("Flowise response text:", text);
-      // Set result to Flowise return, if no result, set to "No result"
-      return text;
+      
+      // Parse the response to extract success status and description
+      const isSuccess = text.includes("[Success]");
+      const description = text.replace(/\[Success\]|\[Failure\]/g, "").trim();
+      
+      return {
+        success: isSuccess,
+        description: description
+      };
     } catch (err) {
       console.error(err);
+      return {
+        success: false,
+        description: "Error occurred while judging challenge."
+      };
     }
     loading = false;
   }
