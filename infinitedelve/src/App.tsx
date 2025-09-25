@@ -21,6 +21,37 @@ import ElementalItemGenerator from "./ElementalItemGenerator";
 
 document.body.style.overflow = "hidden";
 
+// Simple page components
+function Page1({ onReturn }: { onReturn: () => void }) {
+  return (
+    <div style={{ textAlign: "center", padding: "50px" }}>
+      <h1>Page 1</h1>
+      <p>This is Page 1 - a template page</p>
+      <Button onClick={onReturn}>Return to Main Page</Button>
+    </div>
+  );
+}
+
+function Page2({ onReturn }: { onReturn: () => void }) {
+  return (
+    <div style={{ textAlign: "center", padding: "50px" }}>
+      <h1>Page 2</h1>
+      <p>This is Page 2 - a template page</p>
+      <Button onClick={onReturn}>Return to Main Page</Button>
+    </div>
+  );
+}
+
+function Page3({ onReturn }: { onReturn: () => void }) {
+  return (
+    <div style={{ textAlign: "center", padding: "50px" }}>
+      <h1>Page 3</h1>
+      <p>This is Page 3 - a template page</p>
+      <Button onClick={onReturn}>Return to Main Page</Button>
+    </div>
+  );
+}
+
 function App() {
   const [location, setLocation] = useState("");
   const ids = [
@@ -99,7 +130,7 @@ function App() {
   const [alerted, setAlerted] = useState(false);
   const [levelNumber, setLevelNumber] = useState(1);
   const [showContinueButton, setShowContinueButton] = useState(false);
-  const [challengeDescriptions, setChallengeDescriptions] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState("main");
   // Initialize location
   useEffect(() => {
     const initializeLocationGoals = async () => {
@@ -148,7 +179,6 @@ function App() {
     setResult(0);
     setCompletedGoals([false, false, false]);
     setShowContinueButton(false);
-    setChallengeDescriptions([]);
     const genLocation = await LocationGenerator(levelNumber + 1);
     setLevelNumber((prev) => prev + 1);
     setLocation(genLocation);
@@ -161,6 +191,17 @@ function App() {
     console.log("Continue button clicked! Advancing to next level.");
     newLevel();
   }
+  // Handle page navigation
+  if (currentPage === "page1") {
+    return <Page1 onReturn={() => setCurrentPage("main")} />;
+  }
+  if (currentPage === "page2") {
+    return <Page2 onReturn={() => setCurrentPage("main")} />;
+  }
+  if (currentPage === "page3") {
+    return <Page3 onReturn={() => setCurrentPage("main")} />;
+  }
+
   return (
     <>
       <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
@@ -245,38 +286,23 @@ function App() {
           Continue
         </Button>
       )}
-      {challengeDescriptions.length > 0 && (
-        <div style={{ 
-          position: "fixed", 
-          top: "50%", 
-          left: "50%", 
-          transform: "translate(-50%, -50%)", 
-          backgroundColor: "white", 
-          border: "2px solid black", 
-          borderRadius: "10px", 
-          padding: "20px", 
-          maxWidth: "80%", 
-          maxHeight: "60%", 
-          overflow: "auto",
-          zIndex: 1000,
-          boxShadow: "0 4px 8px rgba(0,0,0,0.3)"
-        }}>
-          <h3 style={{ marginTop: 0, textAlign: "center" }}>Challenge Results</h3>
-          {challengeDescriptions.map((description, index) => (
-            <div key={index} style={{ marginBottom: "15px" }}>
-              <h4 style={{ margin: "5px 0", color: completedGoals[index] ? "green" : "red" }}>
-                {goals[index]} - {completedGoals[index] ? "SUCCESS" : "FAILURE"}
-              </h4>
-              <p style={{ margin: "5px 0", lineHeight: "1.4" }}>{description}</p>
-            </div>
-          ))}
-          <div style={{ textAlign: "center", marginTop: "15px" }}>
-            <Button onClick={() => setChallengeDescriptions([])}>
-              Close
-            </Button>
-          </div>
+      <div style={{ marginTop: "20px", textAlign: "center" }}>
+        <div style={{ margin: "5px", display: "inline-block" }}>
+          <Button onClick={() => setCurrentPage("page1")}>
+            Go to Page 1
+          </Button>
         </div>
-      )}
+        <div style={{ margin: "5px", display: "inline-block" }}>
+          <Button onClick={() => setCurrentPage("page2")}>
+            Go to Page 2
+          </Button>
+        </div>
+        <div style={{ margin: "5px", display: "inline-block" }}>
+          <Button onClick={() => setCurrentPage("page3")}>
+            Go to Page 3
+          </Button>
+        </div>
+      </div>
     </>
   );
   async function handleGenerateClick(type: string) {
@@ -347,22 +373,16 @@ function App() {
     }
     // Handle submission logic here, use itemsInGoals array for which items, and goals useState for goals. Return some sort of success/failure.
     var result = [];
-    var descriptions = [];
     result[0] = await ChallengeJudge(goals[0], itemsInGoals);
     result[1] = await ChallengeJudge(goals[1], itemsInGoals);
     result[2] = await ChallengeJudge(goals[2], itemsInGoals);
     console.log("Result: " + result);
-    
-    // Extract success status and descriptions from the new format
-    const resultsBool = result.map((res) => res.success);
-    descriptions = result.map((res) => res.description);
-    
+    const resultsBool = result.map((res) => res === "[Success]");
     let finalCompletedResults: boolean[] = [];
     for (let i = 0; i < 3; i++) {
       finalCompletedResults[i] = completedGoals[i] || resultsBool[i];
     }
     setCompletedGoals(finalCompletedResults);
-    setChallengeDescriptions(descriptions);
     const resultNum = finalCompletedResults.filter(
       (item) => item === true
     ).length;
