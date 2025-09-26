@@ -21,36 +21,6 @@ import ElementalItemGenerator from "./ElementalItemGenerator";
 
 document.body.style.overflow = "hidden";
 
-// Simple page components
-function Page1({ onReturn }: { onReturn: () => void }) {
-  return (
-    <div style={{ textAlign: "center", padding: "50px" }}>
-      <h1>Page 1</h1>
-      <p>This is Page 1 - a template page</p>
-      <Button onClick={onReturn}>Return to Main Page</Button>
-    </div>
-  );
-}
-
-function Page2({ onReturn }: { onReturn: () => void }) {
-  return (
-    <div style={{ textAlign: "center", padding: "50px" }}>
-      <h1>Page 2</h1>
-      <p>This is Page 2 - a template page</p>
-      <Button onClick={onReturn}>Return to Main Page</Button>
-    </div>
-  );
-}
-
-function Page3({ onReturn }: { onReturn: () => void }) {
-  return (
-    <div style={{ textAlign: "center", padding: "50px" }}>
-      <h1>Page 3</h1>
-      <p>This is Page 3 - a template page</p>
-      <Button onClick={onReturn}>Return to Main Page</Button>
-    </div>
-  );
-}
 
 function App() {
   const [location, setLocation] = useState("");
@@ -124,6 +94,11 @@ function App() {
     false,
     false,
   ]);
+  const [boughtSpawners, setBoughtSpawners] = useState({
+    basic: true,
+    location: true,
+    elemental: false,
+  })
   const [result, setResult] = useState<number>(0);
   const [HoverName, setHoverName] = useState("hover-desc");
   const [HoverVisible, setHoverVisible] = useState(false);
@@ -131,6 +106,42 @@ function App() {
   const [levelNumber, setLevelNumber] = useState(1);
   const [showContinueButton, setShowContinueButton] = useState(false);
   const [currentPage, setCurrentPage] = useState("main");
+
+  // Simple page components
+function Page1({ onReturn }: { onReturn: () => void }) {
+  return (
+    <div style={{ textAlign: "center", padding: "50px" }}>
+      <h1>Shop</h1>
+      <p>This is the shop page where you can buy item spawners.</p>
+      {Object.entries(boughtSpawners).filter(([key, value]) => value === false).map(([key]) => (
+          <Button key={key} onClick={() => setBoughtSpawners((prev) => ({ ...prev, [key]: true }))}>
+            Click to buy the {key} spawner!
+          </Button>
+        ))}
+      <Button onClick={onReturn}>Return to Main Page</Button>
+    </div>
+  );
+}
+
+function Page2({ onReturn }: { onReturn: () => void }) {
+  return (
+    <div style={{ textAlign: "center", padding: "50px" }}>
+      <h1>Page 2</h1>
+      <p>This is Page 2 - a template page</p>
+      <Button onClick={onReturn}>Return to Main Page</Button>
+    </div>
+  );
+}
+
+function Page3({ onReturn }: { onReturn: () => void }) {
+  return (
+    <div style={{ textAlign: "center", padding: "50px" }}>
+      <h1>Page 3</h1>
+      <p>This is Page 3 - a template page</p>
+      <Button onClick={onReturn}>Return to Main Page</Button>
+    </div>
+  );
+}
   // Initialize location
   useEffect(() => {
     const initializeLocationGoals = async () => {
@@ -269,15 +280,13 @@ function App() {
         ></GoalsWindow>
       </DndContext>
       <HoverDesc text={HoverName} visible={HoverVisible}></HoverDesc>
-      <Button onClick={() => handleGenerateClick("location")}>
-        Click to spawn a themed item!
-      </Button>
-      <Button onClick={() => handleGenerateClick("basic")}>
-        Click to spawn a basic item!
-      </Button>
-      <Button onClick={() => handleGenerateClick("elemental")}>
-        Click to spawn an elemental item!
-      </Button>
+      <ul style={{ padding: "0px", marginBottom: "0px" }}>
+        {Object.entries(boughtSpawners).filter(([key, value]) => value === true).map(([key]) => (
+          <Button key={key} onClick={() => handleGenerateClick(key)}>
+            Click to spawn a {key} item!
+          </Button>
+        ))}
+      </ul>
       <Button onClick={handleLocationClick}>
         Click to re-roll the location!
       </Button>
