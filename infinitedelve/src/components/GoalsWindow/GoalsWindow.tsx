@@ -4,13 +4,13 @@ import styles from "./GoalsWindow.module.css";
 import Button from "../Button";
 interface Props {
   goals: string[];
-  result?: number;
+  result?: string[];
   completedGoals: boolean[];
   submitAction: () => void;
 }
 const GoalsWindow = ({
   goals,
-  result = 0,
+  result = [],
   completedGoals = [],
   submitAction,
 }: Props) => {
@@ -34,10 +34,15 @@ const GoalsWindow = ({
       <Button onClick={submitAction} color="primary">
         Submit
       </Button>
-      {result !== 0 && (
+      {result.length > 0 && (
         <>
-          <h3>Result:</h3>
-          <p>{result}</p>
+          <h3>Results:</h3>
+          {result.map((response, index) => (
+            <div key={index} style={{ marginBottom: "10px" }}>
+              <strong>{goals[index]}:</strong>
+              <p style={{ margin: "5px 0", fontSize: "0.9em" }}>{response}</p>
+            </div>
+          ))}
         </>
       )}
     </div>

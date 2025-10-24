@@ -99,7 +99,7 @@ function App() {
     location: true,
     elemental: false,
   })
-  const [result, setResult] = useState<number>(0);
+  const [result, setResult] = useState<string[]>([]);
   const [HoverName, setHoverName] = useState("hover-desc");
   const [HoverVisible, setHoverVisible] = useState(false);
   const [alerted, setAlerted] = useState(false);
@@ -187,7 +187,7 @@ function Page3({ onReturn }: { onReturn: () => void }) {
     return count < 3;
   }
   async function newLevel() {
-    setResult(0);
+    setResult([]);
     setCompletedGoals([false, false, false]);
     setShowContinueButton(false);
     const genLocation = await LocationGenerator(levelNumber + 1);
@@ -397,7 +397,7 @@ function Page3({ onReturn }: { onReturn: () => void }) {
       (item) => item === true
     ).length;
     console.log(finalCompletedResults);
-    setResult(resultNum);
+    setResult(result);
     if (resultNum >= 2) {
       // All goals completed successfully
       console.log("All goals completed successfully! Show continue button.");
