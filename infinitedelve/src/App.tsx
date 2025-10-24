@@ -386,7 +386,8 @@ function Page3({ onReturn }: { onReturn: () => void }) {
     result[1] = await ChallengeJudge(goals[1], itemsInGoals);
     result[2] = await ChallengeJudge(goals[2], itemsInGoals);
     console.log("Result: " + result);
-    const resultsBool = result.map((res) => res.startsWith("[Success]"));
+    const resultsBool = result.map((res) => res.includes("[Success]"));
+    console.log("Results bool: " + resultsBool);
     let finalCompletedResults: boolean[] = [];
     for (let i = 0; i < 3; i++) {
       finalCompletedResults[i] = completedGoals[i] || resultsBool[i];
